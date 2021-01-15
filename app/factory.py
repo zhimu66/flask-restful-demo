@@ -7,8 +7,12 @@ import os
 from flask import Flask, Blueprint
 from app.celery import celery_app
 
+from flask_restful import Api
+from flask_restful_swagger import swagger
+
 from app.utils.core import JSONEncoder, db, scheduler
 from app.api.router import router
+from app.api.swagger_test import AddArticle
 
 
 def create_app(config_name, config_path=None):
@@ -30,6 +34,10 @@ def create_app(config_name, config_path=None):
 
     # 注册接口
     register_api(app=app, routers=router)
+
+    # swagger
+    api = swagger.docs(Api(app), description='swagger_test', api_spec_url="/show")
+    register_api(app=app, routers=[AddArticle], api=api)
 
     # 返回json格式转换
     app.json_encoder = JSONEncoder
@@ -79,11 +87,11 @@ def read_yaml(config_name, config_path):
         raise ValueError('请输入正确的配置名称或配置文件路径')
 
 
-def register_api(app, routers):
+def register_api(app, routers, api=None):
     for router_api in routers:
         if isinstance(router_api, Blueprint):
             app.register_blueprint(router_api)
-        else:
+        elif api is None:
             try:
                 endpoint = router_api.__name__
                 view_func = router_api.as_view(endpoint)
@@ -98,6 +106,26 @@ def register_api(app, routers):
                     app.add_url_rule('{}<string:key>'.format(url), view_func=view_func, methods=['PUT', ])
                 if 'DELETE' in router_api.__methods__:
                     app.add_url_rule('{}<string:key>'.format(url), view_func=view_func, methods=['DELETE', ])
+            except Exception as e:
+                raise ValueError(e)
+        else:
+            """
+            api,
+            api_add_resource,
+            apiVersion,
+            swaggerVersion,
+            basePath,
+            resourcePath,
+            produces,
+            api_spec_url,
+            description,
+            """
+            try:
+                endpoint = router_api.__name__
+                view_func = router_api.as_view(endpoint)
+                # url默认为类名小写
+                url = '/{}/'.format(router_api.__name__.lower())
+                api.add_resource(router_api, url)
             except Exception as e:
                 raise ValueError(e)
 

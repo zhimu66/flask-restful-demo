@@ -3,7 +3,6 @@
 from flask import Blueprint
 from flask import request
 from flask_restful import Api
-from flask_restful import Resource
 from flask_restful_swagger import swagger
 
 from app.api.base import Service
@@ -12,10 +11,15 @@ from app.utils.response import ResMsg
 from app.models.model import Article
 
 swagger_test = Blueprint('swagger_test', __name__, url_prefix='/api/swagger_test')
-api = swagger.docs(Api(swagger_test), description='swagger_test', api_spec_url="/show")
 
 
-class AddArticle(Resource):
+class AddArticle(Service):
+    __model__ = Article
+    # 指定需要启用的请求方法
+    __methods__ = ["GET", "POST"]
+
+    # service_name = 'article'
+
     @swagger.operation(
         description="swagger_test 新增文章",
         summary='swagger_test 新增文章',
@@ -26,7 +30,7 @@ class AddArticle(Resource):
             "paramType": "form",
             "dataType": 'string'
         }, {
-            "name": "body1", # 不能为body
+            "name": "body", # 不能为body
             "description": "文章内容",
             "required": True,
             "paramType": "form",
@@ -39,15 +43,10 @@ class AddArticle(Resource):
             "dataType": 'int'
         }])
     def post(self):
-        body = dict(request.form)
-        body['body'] = body.pop("body1", "")
+        res = super().post()
+        return res
 
-        article = Article(**body)
-        db.session.add(article)
-        db.session.commit()
 
-        res = ResMsg()
-        res.update(data=True)
-        return res.data
 
-api.add_resource(AddArticle, 'addarticle')
+
+# api.add_resource(AddArticle, 'addarticlebp')
