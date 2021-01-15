@@ -1,0 +1,8 @@
+venv
+*.pyc
+*.log
+.pytest_cache/
+logs/
+local.py
+scheduler.lock
+.python-version

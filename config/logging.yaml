@@ -3,7 +3,7 @@ disable_existing_loggers: False
 # 定义日志输出格式，可以有多种格式输出
 formatters:
   simple:
-      format: "%(message)s"
+      format: "%(asctime)s [%(name)s] : %(message)s"
   error:
       format: "%(asctime)s [%(name)s] [%(levelname)s] :%(levelno)s: %(message)s"
 
@@ -32,5 +32,5 @@ handlers:
       encoding: utf8
 # 启用handler
 root:
-  level: INFO
+  level: DEBUG
   handlers: [console,info_file_handler,error_file_handler]

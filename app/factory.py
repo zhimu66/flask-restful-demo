@@ -116,7 +116,8 @@ def scheduler_init(app):
             scheduler.init_app(app)
             scheduler.start()
             app.logger.debug('Scheduler Started,---------------')
-        except:
+        except Exception as e:
+            print(e)
             pass
 
         def unlock():
